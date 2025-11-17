@@ -18,14 +18,16 @@ const uploadImage = async (file, path) => {
         const file = req.file;
         const path = req.body?.path || 'error-path';
 
-        console.log('uploaddd')
+        if (!file) {
+            console.error('❌ Arquivo não recebido pelo multer');
+            return res.status(400).json({ message: 'Arquivo não recebido' });
+        }
 
         try {
             const result = await uploadImage(file, path);
-            console.log('uploaddd', result.Location)
             res.json({ url: result.Location });
         } catch (error) {
-            console.error(error);
+            console.error('❌ Erro no upload:', error);
             res.status(500).json({ message: 'Erro no upload' });
         }
 

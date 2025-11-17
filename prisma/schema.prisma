@@ -1,5 +1,7 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "windows"]
+  engineType    = "binary"
 }
 
 datasource db {
@@ -8,42 +10,33 @@ datasource db {
 }
 
 model client {
-  id                                                            Int                   @id @default(autoincrement())
-  name                                                          String                @db.VarChar(100)
-  nick                                                          String?               @db.VarChar(100)
-  phone                                                         String?               @db.VarChar(100)
-  photo                                                         String?               @db.VarChar(255)
-  backgroundImage                                               String?               @db.VarChar(255)
-  description                                                   String?               @db.VarChar(255)
-  objective                                                     String?               @db.VarChar(255)
-  instagram                                                     String?               @db.VarChar(255)
-  createdAt                                                     DateTime              @default(now()) @db.Timestamp(0)
-  updatedAt                                                     DateTime?             @db.Timestamp(0)
-  deletedAt                                                     DateTime?             @db.Timestamp(0)
-  document                                                      String?               @db.VarChar(100)
-  cref                                                          String?               @db.VarChar(100)
-  situation                                                     Int                   @default(1) @db.TinyInt
-  gender                                                        Int?                  @db.TinyInt
-  birthDate                                                     DateTime?             @db.Timestamp(0)
-  userType                                                      Int                   @default(2)
-  bannedUntil                                                   DateTime?             @db.DateTime(0)
-  type                                                          type                  @relation(fields: [userType], references: [id], onUpdate: Restrict, map: "client_type_FK")
-  exercise                                                      exercise[]
-  forbiddenAlerts                                               forbiddenAlerts[]
-  friendship_friendship_senderToclient                          friendship[]          @relation("friendship_senderToclient")
-  friendship_friendship_friendToclient                          friendship[]          @relation("friendship_friendToclient")
-  personalEvaluations_personalEvaluations_personalIdToclient    personalEvaluations[] @relation("personalEvaluations_personalIdToclient")
-  personalEvaluations_personalEvaluations_authorIdToclient      personalEvaluations[] @relation("personalEvaluations_authorIdToclient")
-  posts                                                         posts[]
-  relationship_relationship_clientToclient                      relationship[]        @relation("relationship_clientToclient")
-  relationship_relationship_responsibleToclient                 relationship[]        @relation("relationship_responsibleToclient")
-  serieExecution                                                serieExecution[]
-  shop                                                          shop[]
-  training                                                      training[]
-  trainingAssignments_trainingAssignments_clientIdToclient      trainingAssignments[] @relation("trainingAssignments_clientIdToclient")
-  trainingAssignments_trainingAssignments_responsibleIdToclient trainingAssignments[] @relation("trainingAssignments_responsibleIdToclient")
-  trainingExecution                                             trainingExecution[]
-  user                                                          user[]
+  id                                   Int               @id @default(autoincrement())
+  name                                 String            @db.VarChar(100)
+  nick                                 String?           @db.VarChar(100)
+  phone                                String?           @db.VarChar(100)
+  photo                                String?           @db.VarChar(255)
+  backgroundImage                      String?           @db.VarChar(255)
+  description                          String?           @db.VarChar(255)
+  instagram                            String?           @db.VarChar(255)
+  createdAt                            DateTime          @default(now()) @db.Timestamp(0)
+  updatedAt                            DateTime?         @db.Timestamp(0)
+  deletedAt                            DateTime?         @db.Timestamp(0)
+  document                             String?           @db.VarChar(100)
+  cref                                 String?           @db.VarChar(100)
+  situation                            Int               @default(1) @db.TinyInt
+  gender                               Int?              @db.TinyInt
+  birthDate                            DateTime?         @db.Timestamp(0)
+  userType                             Int               @default(2)
+  bannedUntil                          DateTime?         @db.DateTime(0)
+  type                                 type              @relation(fields: [userType], references: [id], onUpdate: Restrict, map: "client_type_FK")
+  comments                             comments[]
+  eventCapacity                        eventCapacity[]
+  forbiddenAlerts                      forbiddenAlerts[]
+  friendship_friendship_senderToclient friendship[]      @relation("friendship_senderToclient")
+  friendship_friendship_friendToclient friendship[]      @relation("friendship_friendToclient")
+  images                               images[]
+  posts                                posts[]
+  user                                 user[]
 
   @@index([userType], map: "client_type_FK")
 }
@@ -58,24 +51,29 @@ model type {
 }
 
 model user {
-  id            Int       @id @default(autoincrement())
-  email         String    @db.VarChar(100)
-  password      String    @db.VarChar(255)
-  tip           String?   @db.VarChar(255)
-  reply         String?   @db.VarChar(255)
-  questionId    Int?
-  clientId      Int
-  typeId        Int?
-  lastPaymentId Int?
-  createdAt     DateTime  @default(now()) @db.Timestamp(0)
-  updatedAt     DateTime? @db.Timestamp(0)
-  deletedAt     DateTime? @db.Timestamp(0)
-  situation     Int       @default(1) @db.TinyInt
-  socialCode    String?   @db.VarChar(50)
-  inputCode     String?   @db.Char(10)
-  client        client    @relation(fields: [clientId], references: [id], onUpdate: Restrict, map: "user_client_FK")
-  questions     question? @relation(fields: [questionId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "user_questions_FK")
-  type          type?     @relation(fields: [typeId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "user_type_FK")
+  id                   Int             @id @default(autoincrement())
+  email                String          @db.VarChar(100)
+  password             String          @db.VarChar(255)
+  tip                  String?         @db.VarChar(255)
+  reply                String?         @db.VarChar(255)
+  questionId           Int?
+  clientId             Int
+  typeId               Int?            @default(1)
+  lastPaymentId        Int?
+  createdAt            DateTime        @default(now()) @db.Timestamp(0)
+  updatedAt            DateTime?       @db.Timestamp(0)
+  deletedAt            DateTime?       @db.Timestamp(0)
+  situation            Int             @default(1) @db.TinyInt
+  socialCode           String?         @db.VarChar(50)
+  inputCode            String?         @db.Char(10)
+  resetPasswordExpires DateTime?       @db.DateTime(0)
+  blocks               blocks[]
+  companies            companies[]
+  eventCapacity        eventCapacity[]
+  participation        participation[]
+  client               client          @relation(fields: [clientId], references: [id], onUpdate: Restrict, map: "user_client_FK")
+  questions            question?       @relation(fields: [questionId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "user_questions_FK")
+  type                 type?           @relation(fields: [typeId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "user_type_FK")
 
   @@index([questionId], map: "user_questions_FK")
   @@index([typeId], map: "user_type_FK")
@@ -89,156 +87,6 @@ model question {
   user      user[]
 }
 
-model exercise {
-  id            Int          @id @default(autoincrement())
-  name          String       @db.VarChar(100)
-  description   String?      @db.VarChar(100)
-  image         String?      @db.VarChar(255)
-  animation     String?      @db.VarChar(255)
-  video         String?      @db.VarChar(255)
-  createdAt     DateTime     @default(now()) @db.Timestamp(0)
-  updatedAt     DateTime?    @db.Timestamp(0)
-  deletedAt     DateTime?    @db.Timestamp(0)
-  situation     Int          @default(1) @db.TinyInt
-  authorId      Int?
-  groupMuscleId Int?
-  user          client?      @relation(fields: [authorId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "exercise_user_FK")
-  muscleGroup   muscleGroup? @relation(fields: [groupMuscleId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "exercise_muscleGroup_FK")
-  series        series[]
-
-  @@index([groupMuscleId], map: "exercise_muscleGroup_FK")
-  @@index([authorId], map: "exercise_client_FK")
-}
-
-model series {
-  id              Int              @id @default(autoincrement())
-  trainingId      Int?
-  exerciseId      Int?
-  amount          Int?             @default(3) @db.TinyInt
-  isometry        Int?             @default(0) @db.TinyInt
-  bisetExerciseId Int?
-  difficulty      String?          @default("[\"0\", \"0\", \"0\"]") @db.VarChar(255)
-  situation       Int              @default(1) @db.TinyInt
-  createdAt       DateTime?        @default(now()) @db.Timestamp(0)
-  updatedAt       DateTime?        @db.Timestamp(0)
-  deletedAt       DateTime?        @db.Timestamp(0)
-  interval        Int?
-  addSet          Int?             @default(0) @db.TinyInt
-  repetitions     String?          @default("[\"15\", \"15\", \"15\"]") @db.VarChar(255)
-  observations    String?          @db.VarChar(255)
-  personalRecord  String?          @db.VarChar(100)
-  serieExecution  serieExecution[]
-  exercise        exercise?        @relation(fields: [exerciseId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "series_exercise_FK")
-  training        training?        @relation(fields: [trainingId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "series_training_FK")
-
-  @@index([exerciseId], map: "series_exercise_FK")
-  @@index([trainingId], map: "series_training_FK")
-}
-
-model training {
-  id                  Int                   @id @default(autoincrement())
-  name                String                @db.VarChar(100)
-  description         String?               @db.VarChar(255)
-  level               Int                   @default(1) @db.TinyInt
-  authorId            Int
-  url                 String?               @db.VarChar(255)
-  createdAt           DateTime              @default(now()) @db.Timestamp(0)
-  updatedAt           DateTime?             @db.Timestamp(0)
-  deletedAt           DateTime?             @db.Timestamp(0)
-  situation           Int                   @default(1) @db.TinyInt
-  packageId           Int?
-  photo               String?               @db.VarChar(255)
-  series              series[]
-  shop                shop[]
-  user                client                @relation(fields: [authorId], references: [id], onUpdate: Restrict, map: "training_user_FK")
-  Renamedpackage      Renamedpackage?       @relation(fields: [packageId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "training_package_FK")
-  trainingAssignments trainingAssignments[]
-  trainingEvaluations trainingEvaluations[]
-  trainingExecution   trainingExecution[]
-
-  @@index([authorId], map: "training_client_FK")
-  @@index([packageId], map: "training_package_FK")
-}
-
-model muscleGroup {
-  id          Int        @id @default(autoincrement())
-  name        String     @db.VarChar(100)
-  description String?    @db.VarChar(255)
-  situation   Int        @default(1) @db.TinyInt
-  createdAt   DateTime   @default(now()) @db.Timestamp(0)
-  updatedAt   DateTime?  @db.Timestamp(0)
-  deletedAt   DateTime?  @db.Timestamp(0)
-  color       String?    @db.VarChar(100)
-  exercise    exercise[]
-}
-
-model trainingAssignments {
-  id                                               Int       @id @default(autoincrement())
-  clientId                                         Int
-  trainingId                                       Int
-  responsibleId                                    Int?
-  situation                                        Int       @default(1) @db.TinyInt
-  expirationDate                                   DateTime? @db.DateTime(0)
-  createdAt                                        DateTime? @default(now()) @db.DateTime(0)
-  updatedAt                                        DateTime? @db.DateTime(0)
-  deletedAt                                        DateTime? @db.DateTime(0)
-  CompanyResposibleId                              Int?
-  maxExecutions                                    Int?
-  isShop                                           Int       @default(0) @db.TinyInt
-  client_trainingAssignments_clientIdToclient      client    @relation("trainingAssignments_clientIdToclient", fields: [clientId], references: [id], onUpdate: Restrict, map: "trainingAssignments_client_FK")
-  client_trainingAssignments_responsibleIdToclient client?   @relation("trainingAssignments_responsibleIdToclient", fields: [responsibleId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "trainingAssignments_client_FK_1")
-  training                                         training  @relation(fields: [trainingId], references: [id], onUpdate: Restrict, map: "trainingAssignments_training_FK")
-
-  @@index([clientId], map: "trainingAssignments_client_FK")
-  @@index([responsibleId], map: "trainingAssignments_client_FK_1")
-  @@index([trainingId], map: "trainingAssignments_training_FK")
-}
-
-model serieExecution {
-  id                Int                @id @default(autoincrement())
-  exerciseId        Int?
-  clientId          Int?
-  executionId       Int?
-  difficulty        String?            @db.VarChar(255)
-  client            client?            @relation(fields: [clientId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "exerciseExecution_client_FK")
-  trainingExecution trainingExecution? @relation(fields: [executionId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "exerciseExecution_trainingExecution_FK")
-  exercise          series?            @relation(fields: [exerciseId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "exerciseExecution_exercise_FK")
-
-  @@index([clientId], map: "exerciseExecution_client_FK")
-  @@index([executionId], map: "exerciseExecution_trainingExecution_FK")
-  @@index([exerciseId], map: "serieExecution_series_FK")
-}
-
-model trainingExecution {
-  id             Int              @id @default(autoincrement())
-  trainingId     Int?
-  clientId       Int?
-  evaluation     Int?
-  observation    String?          @db.VarChar(100)
-  startAt        DateTime?        @db.DateTime(0)
-  endAt          DateTime?        @db.DateTime(0)
-  serieExecution serieExecution[]
-  client         client?          @relation(fields: [clientId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "trainingExecution_client_FK")
-  training       training?        @relation(fields: [trainingId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "trainingExecution_training_FK")
-
-  @@index([clientId], map: "trainingExecution_client_FK")
-  @@index([trainingId], map: "trainingExecution_training_FK")
-}
-
-model trainingEvaluations {
-  id          Int       @id @default(autoincrement())
-  trainingId  Int?
-  evaluation  Int?
-  observation String?   @db.VarChar(255)
-  createdAt   DateTime? @default(now()) @db.DateTime(0)
-  situation   Int?      @default(1) @db.TinyInt
-  clientId    Int?
-  updatedAt   DateTime? @db.DateTime(0)
-  training    training? @relation(fields: [trainingId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "trainingEvaluations_training_FK")
-
-  @@index([trainingId], map: "trainingEvaluations_training_FK")
-}
-
 model posts {
   id              Int               @id @default(autoincrement())
   title           String?           @db.VarChar(100)
@@ -250,10 +98,14 @@ model posts {
   updatedAt       DateTime?         @db.DateTime(0)
   situation       Int?              @default(1) @db.TinyInt
   type            Int?              @default(1) @db.TinyInt
+  companyId       Int?
+  comments        comments[]
   forbiddenAlerts forbiddenAlerts[]
   client          client?           @relation(fields: [authorId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "posts_client_FK")
+  company         companies?        @relation(fields: [companyId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "posts_company_FK")
 
   @@index([authorId], map: "posts_client_FK")
+  @@index([companyId], map: "posts_company_FK")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -267,11 +119,14 @@ model forbiddenAlerts {
   postCommentId Int?
   updatedText   String?   @db.VarChar(255)
   updatedAt     DateTime? @db.DateTime(0)
+  blocks        blocks[]
   client        client?   @relation(fields: [clientId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "forbiddenAlerts_client_FK")
+  comments      comments? @relation(fields: [postCommentId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "forbiddenAlerts_comments_FK")
   posts         posts?    @relation(fields: [postId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "forbiddenAlerts_posts_FK")
 
   @@index([clientId], map: "forbiddenAlerts_client_FK")
   @@index([postId], map: "forbiddenAlerts_posts_FK")
+  @@index([postCommentId], map: "forbiddenAlerts_comments_FK")
 }
 
 model faq {
@@ -279,34 +134,6 @@ model faq {
   question  String @db.VarChar(100)
   answer    String @db.Text
   situation Int    @default(1) @db.TinyInt
-}
-
-model shop {
-  id             Int             @id @default(autoincrement())
-  packageId      Int?
-  trainingId     Int?
-  value          Float?
-  discount       Float?
-  couponId       Int?
-  situation      Int             @default(1) @db.TinyInt
-  expirationDate DateTime?       @db.DateTime(0)
-  sellerId       Int
-  client         client          @relation(fields: [sellerId], references: [id], onUpdate: Restrict, map: "shop_client_FK")
-  Renamedpackage Renamedpackage? @relation(fields: [packageId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "shop_package_FK")
-  training       training?       @relation(fields: [trainingId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "shop_training_FK")
-
-  @@index([trainingId], map: "shop_training_FK")
-  @@index([packageId], map: "shop_package_FK")
-  @@index([sellerId], map: "shop_client_FK")
-}
-
-/// This model has been renamed to 'Renamedpackage' during introspection, because the original name 'package' is reserved.
-model Renamedpackage {
-  id       Int        @id @default(autoincrement())
-  shop     shop[]
-  training training[]
-
-  @@map("package")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -324,44 +151,158 @@ model friendship {
   @@index([friend], map: "friendship_client_FK_1")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model relationship {
-  id                                      Int       @id @default(autoincrement())
-  client                                  Int
-  responsible                             Int
-  accept                                  Int       @default(0) @db.TinyInt
-  createdAt                               DateTime  @default(now()) @db.DateTime(0)
-  updatedAt                               DateTime? @db.DateTime(0)
-  client_relationship_clientToclient      client    @relation("relationship_clientToclient", fields: [client], references: [id], onUpdate: Restrict, map: "relationship_client_FK")
-  client_relationship_responsibleToclient client    @relation("relationship_responsibleToclient", fields: [responsible], references: [id], onUpdate: Restrict, map: "relationship_client_FK_1")
+model comments {
+  id              Int               @id @default(autoincrement())
+  content         String            @db.VarChar(500)
+  postId          Int
+  authorId        Int
+  parentCommentId Int?
+  type            Int               @default(1) @db.TinyInt
+  situation       Int               @default(1) @db.TinyInt
+  createdAt       DateTime          @default(now()) @db.DateTime(0)
+  updatedAt       DateTime?         @db.DateTime(0)
+  deletedAt       DateTime?         @db.DateTime(0)
+  author          client            @relation(fields: [authorId], references: [id], onUpdate: Restrict, map: "comments_client_FK")
+  parentComment   comments?         @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "comments_parent_FK")
+  replies         comments[]        @relation("CommentReplies")
+  post            posts             @relation(fields: [postId], references: [id], onUpdate: Restrict, map: "comments_posts_FK")
+  forbiddenAlerts forbiddenAlerts[]
 
-  @@index([client], map: "relationship_client_FK")
-  @@index([responsible], map: "relationship_client_FK_1")
+  @@index([postId], map: "comments_posts_FK")
+  @@index([authorId], map: "comments_client_FK")
+  @@index([parentCommentId], map: "comments_parent_FK")
 }
 
-model personalEvaluations {
-  id                                            Int       @id @default(autoincrement())
-  personalId                                    Int?
-  evaluation                                    Int?
-  observations                                  String?   @db.VarChar(255)
-  createdAt                                     DateTime  @default(now()) @db.DateTime(0)
-  authorId                                      Int
-  updatedAt                                     DateTime? @db.DateTime(0)
-  answers                                       answers[]
-  client_personalEvaluations_personalIdToclient client?   @relation("personalEvaluations_personalIdToclient", fields: [personalId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "personalEvaluations_client_FK")
-  client_personalEvaluations_authorIdToclient   client    @relation("personalEvaluations_authorIdToclient", fields: [authorId], references: [id], onUpdate: Restrict, map: "personalEvaluations_client_FK_1")
+model images {
+  id        Int       @id @default(autoincrement())
+  clientId  Int
+  url       String    @db.VarChar(255)
+  order     Int       @default(0)
+  situation Int       @default(1) @db.TinyInt
+  createdAt DateTime  @default(now()) @db.DateTime(0)
+  updatedAt DateTime? @db.DateTime(0)
+  deletedAt DateTime? @db.DateTime(0)
+  client    client    @relation(fields: [clientId], references: [id], onUpdate: Restrict, map: "images_client_FK")
 
-  @@index([personalId], map: "personalEvaluations_client_FK")
-  @@index([authorId], map: "personalEvaluations_client_FK_1")
+  @@index([clientId], map: "images_client_FK")
 }
 
-model answers {
-  id                   Int                  @id @default(autoincrement())
-  text                 String               @db.VarChar(255)
-  personalEvaluationId Int?
-  createdAt            DateTime             @default(now()) @db.DateTime(0)
-  updatedAt            DateTime?            @db.DateTime(0)
-  personalEvaluations  personalEvaluations? @relation(fields: [personalEvaluationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "answers_personalEvaluations_FK")
+model blocks {
+  id               Int             @id @default(autoincrement())
+  userId           Int
+  forbiddenAlertId Int
+  period           Int
+  situation        Int             @default(1) @db.TinyInt
+  createdAt        DateTime        @default(now()) @db.DateTime(0)
+  updatedAt        DateTime?       @db.DateTime(0)
+  deletedAt        DateTime?       @db.DateTime(0)
+  forbiddenAlert   forbiddenAlerts @relation(fields: [forbiddenAlertId], references: [id], onUpdate: Restrict, map: "blocks_forbiddenAlerts_FK")
+  user             user            @relation(fields: [userId], references: [id], onUpdate: Restrict, map: "blocks_user_FK")
 
-  @@index([personalEvaluationId], map: "answers_personalEvaluations_FK")
+  @@index([userId], map: "blocks_user_FK")
+  @@index([forbiddenAlertId], map: "blocks_forbiddenAlerts_FK")
+}
+
+model allGenders {
+  id        Int       @id @default(autoincrement())
+  name      String    @db.VarChar(100)
+  situation Int       @default(1) @db.TinyInt
+  createdAt DateTime  @default(now()) @db.DateTime(0)
+  updatedAt DateTime? @db.DateTime(0)
+  deletedAt DateTime? @db.DateTime(0)
+}
+
+model companies {
+  id              Int       @id @default(autoincrement())
+  name            String    @db.VarChar(100)
+  description     String?   @db.VarChar(255)
+  photo           String?   @db.VarChar(255)
+  backgroundImage String?   @db.VarChar(255)
+  phone           String?   @db.VarChar(100)
+  email           String?   @db.VarChar(100)
+  responsibleId   Int
+  situation       Int       @default(1) @db.TinyInt
+  createdAt       DateTime  @default(now()) @db.DateTime(0)
+  updatedAt       DateTime? @db.DateTime(0)
+  deletedAt       DateTime? @db.DateTime(0)
+  cnpj            String    @db.VarChar(18)
+  responsible     user      @relation(fields: [responsibleId], references: [id], onUpdate: Restrict, map: "companies_user_FK")
+  events          events[]
+  posts           posts[]
+
+  @@index([responsibleId], map: "companies_user_FK")
+}
+
+model eventType {
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(100)
+  description String?   @db.VarChar(255)
+  situation   Int       @default(1) @db.TinyInt
+  createdAt   DateTime  @default(now()) @db.DateTime(0)
+  updatedAt   DateTime? @db.DateTime(0)
+  deletedAt   DateTime? @db.DateTime(0)
+  events      events[]
+}
+
+model events {
+  id               Int             @id @default(autoincrement())
+  name             String          @db.VarChar(200)
+  description      String          @db.Text
+  photo            String?         @db.VarChar(255)
+  backgroundImage  String?         @db.VarChar(255)
+  isPublic         Boolean         @default(false)
+  isPublicMetrics  Boolean         @default(true)
+  situation        Int             @default(1) @db.TinyInt
+  promotionalText  String?         @db.Text
+  promotionalVideo String?         @db.VarChar(255)
+  promotionalImage String?         @db.VarChar(255)
+  promotionalUrl   String?         @db.VarChar(500)
+  companyId        Int
+  eventTypeId      Int             @default(1)
+  createdAt        DateTime        @default(now()) @db.DateTime(0)
+  updatedAt        DateTime?       @db.DateTime(0)
+  deletedAt        DateTime?       @db.DateTime(0)
+  startAt          DateTime        @db.DateTime(0)
+  endAt            DateTime        @db.DateTime(0)
+  eventCapacity    eventCapacity[]
+  participation    participation[]
+  company          companies       @relation(fields: [companyId], references: [id], onUpdate: Restrict, map: "events_company_FK")
+  eventType        eventType       @relation(fields: [eventTypeId], references: [id], onUpdate: Restrict, map: "events_eventType_FK")
+
+  @@index([companyId], map: "events_company_FK")
+  @@index([eventTypeId], map: "events_eventType_FK")
+}
+
+model participation {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  eventId   Int
+  status    Int       @default(0) @db.TinyInt
+  createdAt DateTime  @default(now()) @db.DateTime(0)
+  updatedAt DateTime? @db.DateTime(0)
+  user      user      @relation(fields: [userId], references: [id], onUpdate: Restrict, map: "participation_user_FK")
+  event     events    @relation(fields: [eventId], references: [id], onUpdate: Restrict, map: "participation_event_FK")
+
+  @@unique([userId, eventId], map: "participation_unique")
+  @@index([userId], map: "participation_user_FK")
+  @@index([eventId], map: "participation_event_FK")
+}
+
+model eventCapacity {
+  id          Int       @id @default(autoincrement())
+  eventId     Int
+  type        String    @db.VarChar(20)
+  quantity    Int
+  description String?   @db.VarChar(500)
+  userId      Int?
+  clientId    Int?
+  createdAt   DateTime  @default(now()) @db.DateTime(0)
+  updatedAt   DateTime? @db.DateTime(0)
+  client      client?   @relation(fields: [clientId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "eventCapacity_client_FK")
+  event       events    @relation(fields: [eventId], references: [id], onUpdate: Restrict, map: "eventCapacity_event_FK")
+  user        user?     @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "eventCapacity_user_FK")
+
+  @@index([eventId], map: "eventCapacity_event_FK")
+  @@index([userId], map: "eventCapacity_user_FK")
+  @@index([clientId], map: "eventCapacity_client_FK")
 }

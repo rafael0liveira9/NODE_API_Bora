@@ -1,23 +1,23 @@
 const { json } = require('body-parser');
-const exercises = require('../exercises');
 const { jwtUncrypt } = require('../../utils/midleware/auth'),
-    { PrismaClient } = require("@prisma/client"),
-    p = new PrismaClient();
+    p = require('../../lib/prisma');
 
 const GetFaq = async (req, res) => {
+    try {
+        const data = await p.faq.findMany({
+            where: {
+                situation: 1,
+            }
+        })
 
-    const data = await p.faq.findMany({
-        where: {
-            situation: 1,
+        if (data) {
+            return res.status(200).json(data);
+        } else {
+            return res.status(401).json(null);
         }
-    })
-
-    if (data) {
-        await p.$disconnect();
-        return res.status(200).json(data);
-    } else {
-        await p.$disconnect();
-        return res.status(401).json(null);
+    } catch (error) {
+        console.error("❌ Erro ao buscar FAQ:", error);
+        return res.status(500).json({ message: "Erro ao buscar FAQ." });
     }
 }
 

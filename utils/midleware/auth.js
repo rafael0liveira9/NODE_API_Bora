@@ -1,5 +1,4 @@
-const { PrismaClient } = require("@prisma/client"),
-    p = new PrismaClient(),
+const p = require('../../lib/prisma'),
     { verify, sign } = require("jsonwebtoken"),
     { compareSync, hashSync } = require('bcryptjs'),
     error = {
@@ -22,14 +21,11 @@ const { PrismaClient } = require("@prisma/client"),
             })
 
             if (!alreadyUser) {
-                await p.$disconnect();
                 return {
                     status: 401,
                     message: "Usuário não autênticado"
                 }
             }
-
-            await p.$disconnect();
 
             return {
                 status: 201,
