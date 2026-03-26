@@ -279,7 +279,7 @@ const DeleteComment = async (req, res) => {
                 situation: 1
             },
             include: {
-                posts: {
+                post: {
                     include: {
                         company: true
                     }
@@ -296,11 +296,11 @@ const DeleteComment = async (req, res) => {
         const isCommentAuthor = comment.authorId === alreadyClient.client.id;
 
         // 2. É o dono do post (se post é de cliente)
-        const isPostOwner = comment.posts.authorId && comment.posts.authorId === alreadyClient.client.id;
+        const isPostOwner = comment.post.authorId && comment.post.authorId === alreadyClient.client.id;
 
         // 3. É o responsável da empresa (se post é de empresa)
-        const isCompanyResponsible = comment.posts.companyId &&
-            comment.posts.company?.responsibleId === user.user.id;
+        const isCompanyResponsible = comment.post.companyId &&
+            comment.post.company?.responsibleId === user.user.id;
 
         if (!isCommentAuthor && !isPostOwner && !isCompanyResponsible) {
             return res.status(403).json({

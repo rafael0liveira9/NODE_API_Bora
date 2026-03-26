@@ -44,8 +44,8 @@ const GetAllPosts = async (req, res, page, pageSize) => {
 
         const posts = await p.posts.findMany({
             where: {
-                situation: 1,
-                type: 1
+                situation: 1
+                // Removido filtro de type para mostrar todos os posts (clientes e empresas)
             },
             include: {
                 client: {

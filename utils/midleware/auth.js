@@ -9,9 +9,22 @@ const p = require('../../lib/prisma'),
     // **************************************** JWT TEST
     jwtUncrypt = async (jwt) => {
 
-        const decoded = verify(jwt, process.env.SECRET_CLIENT_KEY);
-
         try {
+            // Remove "Bearer " prefix if present
+            let token = jwt;
+            if (jwt && jwt.startsWith('Bearer ')) {
+                token = jwt.substring(7);
+            }
+
+            // Validate token exists
+            if (!token || token.trim() === '') {
+                return {
+                    status: 401,
+                    message: "Token inválido ou ausente"
+                };
+            }
+
+            const decoded = verify(token, process.env.SECRET_CLIENT_KEY);
 
             const alreadyUser = await p.user.findFirst({
                 where: {
@@ -41,7 +54,10 @@ const p = require('../../lib/prisma'),
 
         } catch (error) {
             console.log(error, "Erro ao autênticar user");
-            return error;
+            return {
+                status: 401,
+                message: "Token inválido ou expirado"
+            };
         }
     }
 

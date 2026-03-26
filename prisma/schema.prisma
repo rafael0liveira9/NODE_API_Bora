@@ -37,6 +37,8 @@ model client {
   images                               images[]
   posts                                posts[]
   user                                 user[]
+  matchesSent                          match[]           @relation("match_sender")
+  matchesReceived                      match[]           @relation("match_receiver")
 
   @@index([userType], map: "client_type_FK")
 }
@@ -266,6 +268,7 @@ model events {
   endAt            DateTime        @db.DateTime(0)
   eventCapacity    eventCapacity[]
   participation    participation[]
+  matches          match[]
   company          companies       @relation(fields: [companyId], references: [id], onUpdate: Restrict, map: "events_company_FK")
   eventType        eventType       @relation(fields: [eventTypeId], references: [id], onUpdate: Restrict, map: "events_eventType_FK")
 
@@ -305,4 +308,29 @@ model eventCapacity {
   @@index([eventId], map: "eventCapacity_event_FK")
   @@index([userId], map: "eventCapacity_user_FK")
   @@index([clientId], map: "eventCapacity_client_FK")
+}
+
+/// Tabela de matches estilo Tinder para sistema de relacionamento por evento
+model match {
+  id            Int       @id @default(autoincrement())
+  senderId      Int       // Usuário que deu o primeiro like
+  receiverId    Int       // Usuário que recebeu o primeiro like
+  eventId       Int       // Evento onde o match aconteceu
+  senderMatch   Int       @default(1) @db.TinyInt // 0 = removeu match, 1 = deu match
+  receiverMatch Int       @default(0) @db.TinyInt // 0 = não deu match ainda, 1 = deu match de volta
+  matchedAt     DateTime? @db.DateTime(0) // Data quando ambos deram match (match mútuo)
+  situation     Int       @default(1) @db.TinyInt // 0 = deletado/desfeito, 1 = ativo
+  createdAt     DateTime  @default(now()) @db.DateTime(0)
+  updatedAt     DateTime? @db.DateTime(0)
+  deletedAt     DateTime? @db.DateTime(0)
+  sender        client    @relation("match_sender", fields: [senderId], references: [id], onUpdate: Restrict, map: "match_sender_FK")
+  receiver      client    @relation("match_receiver", fields: [receiverId], references: [id], onUpdate: Restrict, map: "match_receiver_FK")
+  event         events    @relation(fields: [eventId], references: [id], onUpdate: Restrict, map: "match_event_FK")
+
+  @@unique([senderId, receiverId, eventId], map: "match_unique")
+  @@index([senderId], map: "match_sender_FK")
+  @@index([receiverId], map: "match_receiver_FK")
+  @@index([eventId], map: "match_event_FK")
+  @@index([matchedAt], map: "match_matchedAt_IDX")
+  @@index([situation], map: "match_situation_IDX")
 }

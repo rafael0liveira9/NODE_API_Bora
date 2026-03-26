@@ -123,6 +123,7 @@ router.get('/public-events', async (req, res) => {
         await events.GetAllEvents(req, res, page, pageSize, search);
     }),
     router.get('/event/:id', async (req, res) => events.GetEventById(req, res)),
+    router.get('/my-company', async (req, res) => companies.GetMyCompany(req, res)),
     router.get('/my-company-events', async (req, res) => {
         const page = req.query.page;
         const pageSize = req.query.pageSize;

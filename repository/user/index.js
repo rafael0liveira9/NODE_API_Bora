@@ -560,19 +560,21 @@ const GetUserById = async (req, res) => {
         try {
             // Usando SQL raw para contornar bug do Prisma no Windows
             let query = `
-                SELECT * FROM client
-                WHERE situation = 1
-                AND deletedAt IS NULL
+                SELECT c.*, u.id as userId
+                FROM client c
+                LEFT JOIN user u ON u.clientId = c.id
+                WHERE c.situation = 1
+                AND c.deletedAt IS NULL
             `;
 
             const params = [];
 
             if (searchString) {
-                query += ` AND (name LIKE ? OR nick LIKE ?)`;
+                query += ` AND (c.name LIKE ? OR c.nick LIKE ?)`;
                 params.push(`%${searchString}%`, `%${searchString}%`);
             }
 
-            query += ` ORDER BY name ASC`;
+            query += ` ORDER BY c.name ASC`;
 
             const allClients = await p.$queryRawUnsafe(query, ...params);
 

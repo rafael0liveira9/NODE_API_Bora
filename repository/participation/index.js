@@ -47,7 +47,7 @@ const UpsertParticipation = async (req, res) => {
         // 4. Create or update participation
         const participation = await p.participation.upsert({
             where: {
-                participation_unique: {
+                userId_eventId: {
                     userId: user.user.id,
                     eventId: parseInt(eventId)
                 }
@@ -138,14 +138,11 @@ const GetEventParticipations = async (req, res) => {
             return res.status(400).json({ message: "ID do evento é obrigatório." });
         }
 
-        // 3. Check if event exists and user is the company responsible
+        // 3. Check if event exists
         const event = await p.events.findFirst({
             where: {
                 id: parseInt(eventId),
                 situation: 1
-            },
-            include: {
-                company: true
             }
         });
 
@@ -153,15 +150,23 @@ const GetEventParticipations = async (req, res) => {
             return res.status(404).json({ message: "Evento não encontrado." });
         }
 
-        // Check if user is the company responsible
-        if (event.company.responsibleId !== user.user.id) {
-            return res.status(403).json({ message: "Você não tem permissão para ver as participações deste evento." });
-        }
-
-        // 4. Get participations
-        const participations = await p.participation.findMany({
+        // 4. Get ALL participations count (only status 1 and 2)
+        const totalCount = await p.participation.count({
             where: {
-                eventId: parseInt(eventId)
+                eventId: parseInt(eventId),
+                status: {
+                    in: [1, 2]
+                }
+            }
+        });
+
+        // 5. Get participations in random order, limit to 30
+        const allParticipations = await p.participation.findMany({
+            where: {
+                eventId: parseInt(eventId),
+                status: {
+                    in: [1, 2]  // Only show confirmed and checked-in participants
+                }
             },
             include: {
                 user: {
@@ -169,24 +174,25 @@ const GetEventParticipations = async (req, res) => {
                         client: true
                     }
                 }
-            },
-            orderBy: {
-                createdAt: 'desc'
             }
         });
 
-        // 5. Count by status
+        // Shuffle array randomly and take first 30
+        const shuffled = allParticipations.sort(() => Math.random() - 0.5);
+        const participations = shuffled.slice(0, 30);
+
+        // 6. Count by status (from all participations, not just the 30 shown)
         const stats = {
-            total: participations.length,
-            interestedCount: participations.filter(p => p.status === 1).length,
-            checkedInCount: participations.filter(p => p.status === 2).length,
-            gaveUpCount: participations.filter(p => p.status === 3).length,
-            leftCount: participations.filter(p => p.status === 4).length
+            total: totalCount,
+            shown: participations.length,
+            interestedCount: allParticipations.filter(p => p.status === 1).length,
+            checkedInCount: allParticipations.filter(p => p.status === 2).length
         };
 
         return res.status(200).json({
             participations,
-            stats
+            stats,
+            totalCount
         });
 
     } catch (error) {

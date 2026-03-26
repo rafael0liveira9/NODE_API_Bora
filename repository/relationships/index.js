@@ -79,16 +79,60 @@ const GetMyFriendRequest = async (req, res) => {
         return res.status(403).json({ message: "Usuário não autorizado." });
     }
 
+    // Validar se o ID do amigo foi enviado
+    const friendId = req.body.id || req.body.friendId || req.body.friend;
+    if (!friendId) {
+        console.log('❌ Nenhum ID de amigo encontrado no body');
+        return res.status(400).json({ message: "ID do amigo é obrigatório." });
+    }
+
+    // Verificar se o amigo existe
+    const friendExists = await p.client.findUnique({
+        where: { id: parseInt(friendId) }
+    });
+
+    if (!friendExists) {
+        return res.status(404).json({ message: "Usuário não encontrado." });
+    }
+
+    // Verificar se não está tentando adicionar a si mesmo
+    if (alreadyUser.client.id === parseInt(friendId)) {
+        return res.status(400).json({ message: "Você não pode adicionar a si mesmo como amigo." });
+    }
+
+    // Verificar se já existe pedido de amizade
+    const existingFriendship = await p.friendship.findFirst({
+        where: {
+            OR: [
+                { sender: alreadyUser.client.id, friend: parseInt(friendId) },
+                { sender: parseInt(friendId), friend: alreadyUser.client.id }
+            ]
+        }
+    });
+
+    if (existingFriendship) {
+        if (existingFriendship.accept === 1) {
+            return res.status(400).json({ message: "Vocês já são amigos." });
+        } else if (existingFriendship.accept === 0) {
+            return res.status(400).json({ message: "Já existe um pedido de amizade pendente." });
+        } else {
+            return res.status(400).json({ message: "Pedido de amizade já foi recusado anteriormente." });
+        }
+    }
+
     const data = await p.friendship.create({
         data: {
-            sender: alreadyUser?.client?.id,
-            friend: req.body.id,
+            sender: alreadyUser.client.id,
+            friend: parseInt(friendId),
         }
     })
 
-
     if (data) {
-        return res.status(201).json(data);
+        return res.status(201).json({
+            success: true,
+            message: "Pedido de amizade enviado com sucesso!",
+            data: data
+        });
     } else {
         return res.status(401).json({
             message: "Usuário não cadastrado."
@@ -123,7 +167,7 @@ const GetMyFriendRequest = async (req, res) => {
     const request = await p.friendship.findFirst({
         where: {
             sender: req.body.sender,
-            friend: alreadyUser.client.id.id,
+            friend: alreadyUser.client.id,
             accept: 0
         }
     })
@@ -144,7 +188,11 @@ const GetMyFriendRequest = async (req, res) => {
 
 
     if (data) {
-        return res.status(201).json(data);
+        return res.status(201).json({
+            success: true,
+            message: req.body.accept === true ? "Amizade aceita com sucesso!" : "Pedido recusado.",
+            data: data
+        });
     } else {
         return res.status(401).json({
             message: "Usuário não cadastrado."
